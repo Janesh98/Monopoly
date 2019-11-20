@@ -32,6 +32,7 @@ class Client():
         
             ######  DISPLAY TKINTER HERE  ########
             
+            
             #asking for input, server or tkinter
             try:
                 read, write, error = select.select(inputs, [], [])
