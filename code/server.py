@@ -2,7 +2,7 @@ import socket
 import threading
 import sys
 
-class Server():
+class Server:
     def __init__(self, port="8000", players=6):
         self.ip_addr = ""
         self.port = int(port)
@@ -35,19 +35,19 @@ class Server():
         #send server info (setup client)
         #send_server_info(conn)
         #welcome message and client id
-        #send_message(conn, "print Welcome, input your name 'name <your name>'\nid {}\n".format(addr[1]))
+        self.send_client(conn, "Welcome")
         
         while self.server_running:
             try:
-                message = conn.recv(2048)           #receive client commands
+                message = conn.recv(1024)           #receive client commands
                 if message:
-                    enc_message = message.decode()
-                    self.send_all(enc_message)      #echos message
-                    print(enc_message)              #for debugging
+                    dec_message = message.decode()
+                    self.send_all(dec_message)      #echos message
+                    print(dec_message)              #for debugging
                     #
-                    #game.process_command(enc_message)
+                    #game.process_command(dec_message)
                     #
-                    #connected_devices[conn]["player"].client_command(enc_message)   #process client commands
+                    #connected_devices[conn]["player"].client_command(dec_message)   #process client commands
                 else:
                     pass
             except:
@@ -56,8 +56,8 @@ class Server():
     def run(self):
         try:
             while True:
-                conn , addr = self.server_socket.accept()         #accept new client
-                self.connected_devices[conn] = {"addr" :addr}    #put into a dictionary
+                conn , addr = self.server_socket.accept()           #accept new client
+                self.connected_devices[conn] = {"addr" :addr}       #put into a dictionary
                 print("{} connected".format(addr))
                 self.start_client_thread(conn, addr)
         except KeyboardInterrupt:           #shutdown server by ^C
