@@ -1,31 +1,32 @@
 class Player:
 
-    def __init__(self, name, money, portfolio, jail_free_card=False):
-
-        ''' initializes:
-            name : user name (str)
-            money : default starting account balance (int)
-            portfolio : list of properties owned (str[])
-            jail_free_card : boolean indicating whether the player is
-                             in possession of a get out of jail free
-                             card (bool)
-        '''
-        pass
+    def __init__(self, name, money, portfolio=[], jail_free_card=False):
+        self.name = name
+        self.money = money
+        self.portfolio = portfolio
+        self.jail_free_card = jail_free_card
+        self.balance = money
 
     def get_balance(self):
-
-        ''' return player account balance (int) '''
-        pass
+        return self.balance
 
     def withdraw(self, amount):
-        ''' withdraws amount from players' account balance
-            return None
-        '''
-        pass
+        self.balance -= amount
 
     def deposit(self, amount):
+        self.balance += amount
 
-        ''' deposits amount into players' account
-            return None
-        '''
-        pass
+    def addProperty(self,propertyID):
+        self.portfolio.append(propertyID)
+    
+    def removeProperty(self,propertyID):
+        if propertyID in self.portfolio:
+            self.portfolio.remove(propertyID)
+        else:
+            return "User does not own this property"
+
+    def getOutOfJailWon(self):
+        self.getOutOfJail = True
+    
+    def getOutOfJailUsed(self):
+        self.getOutOfJail = False
