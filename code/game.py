@@ -1,3 +1,5 @@
+from random import randint
+
 class Game:
 
     def __init__(self, player_list, current_player):
@@ -6,19 +8,23 @@ class Game:
             player_list : list of players (Player[])
             current_player : player whose turn it currently is (Player)
         '''
-        pass
+        self.players = player_list
+        self.player = current_player
 
     def roll_dice(self):
 
         ''' return random number (int) '''
-        pass
+        return randint(1, 6)
 
-    def sell_property(self):
+    def sell_property(self, propertyID, propertyCost):
 
         ''' auctions off the property to all players
             return (None)
         '''
-        pass
+        for player in players:
+            if player.wants(propertyID, propertyCost):
+                self.buy_property(propertyID, propertyCost)
+                break
 
     def trade(self, other_player):
 
@@ -27,9 +33,11 @@ class Game:
             if accepted
             return (None)
         '''
+        # TODO
         pass
 
-    def buy_property(self):
+
+    def buy_property(self, propertyID, propertyCost):
 
         ''' allows the player to buy property,
             the price of the property is deducted
@@ -37,7 +45,12 @@ class Game:
             property is added to their portfolio
             return (None)
         '''
-        pass
+        balance = self.player.get_balance() - propertyCost
+        if balance > 0:
+            self.player.withdraw(propertyCost)
+            self.player.addProperty(propertyID)
+        else:
+            print("You do no have sufficient funds to purchase this property")
 
     def is_bankrupt(self):
 
@@ -46,7 +59,7 @@ class Game:
             is greater than 0
             return (bool)
         '''
-        pass
+        return self.current_player.get_balance() or self.current_player.portfolio_value() <= 0
 
     def end_turn(self):
 
@@ -54,4 +67,10 @@ class Game:
             the next player a turn
             return (None)
         '''
-        pass
+        i = 0
+        while self.players[i] != self.player:
+            i+=1
+        if i == len(self.players) - 1:
+            self.player =  self.players[0]
+        else:
+            self.player = self.players[i + 1]
