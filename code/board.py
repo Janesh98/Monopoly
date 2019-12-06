@@ -1,30 +1,47 @@
-import random
+class Tile():
+	'''
+	category is the type of the tile. it can be property, chance, community_chest, police, jail, free_parking or go.
+	position of tile on board (0-39)
+	ptr - e.g if tile is of 'property'.
+	'''
+	def __init__(self, position, category, name=None, colour=None, price=None):
+		self.position = position
+		self.category = category
+		self.name = name
+		self.colour = colour
+		self.price = price
 
-class Board:
+class Pawn():
+	def __init__(self, pawn_id, position, colour, ptr=None):
+		self.pawn_id = pawn_id
+		self.position = position
+		self.colour = colour
+		self.ptr = ptr
 
-    def __init__(self, pawn_list, property_list, chance_cards, comm_chest_cards):
-        ''' initializes:
-            pawn_list : list of different types of pawns (Pawn[])
-            property_list : list of different types of pawns (Properties[])
-            chance_cards : list of different types of chance cards (Chance[])
-            comm_chest_cards : list of different community chest cards (Comm[])
-        '''
-        self.pawn_list = pawn_list
-        self.property_list = property_list
-        self.chance_cards = chance_cards["yes","no"]
-        self.comm_chest_cards = comm_chest_cards
+	def set_position(self, position):
+		self.position = position
 
-    def random_chance_card(self, chance_cards):
+	def get_position(self):
+		return self.position
 
-        ''' returns a random card from the list of the chance type
-            return (card)
-        '''
-        return random.choice(chance_cards)
+	def move(self, moves):
+		self.position += moves
 
-N
-     def random_comm_card(self, card_type):
+	def __str__(self):
+		return "Pawn: {}, Position {}".format(self.pawn_id, self.position)
 
-        ''' returns a random card from the list of the community chest type
-            return (card)
-        '''
-        return random.choice(comm_chest_cards)
+class Board():
+	'''
+	tiles - list of all tiles contained in board
+	pawns - dictionary of pawns on board
+	'''
+	def __init__(self, tiles, pawns):
+		self.tiles = tiles
+		self.pawns = pawns
+
+	def __str__(self):
+		a = []
+		for pawn in self.pawns.keys():
+			s = str(self.pawns[pawn])
+			a.append(s)
+		return '\n'.join(a)

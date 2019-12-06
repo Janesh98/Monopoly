@@ -1,4 +1,6 @@
 from tkinter import *
+from PIL import Image, ImageTk
+from board import Tile, Pawn, Board
 
 #general divider for UI layout
 class Divider(Frame):
@@ -7,191 +9,110 @@ class Divider(Frame):
 		self.parent = parent
 
 #frames for side tile on board (property, chance, community chest)
+#width = parent.parent as it will get width from frame containing parent canvas
 class Side1(Frame):
-	def __init__(self, parent=None):
-		Frame.__init__(self, parent, width = parent.width * (2/25), height = parent.height * (13/100), highlightthickness = 2, highlightbackground = "black") # correct ratios for side tile size            
+	def __init__(self, parent, category, name=None, colour=None, price=None):
+		Frame.__init__(self, parent, width = parent.width * (2/25), height = parent.height * (13/100), highlightthickness = 1, highlightbackground = "black") # correct ratios for side tile size            
 		self.parent = parent
+		self.width = parent.width * (2/25)
+		self.height = parent.height * (13/100)
+		self.category = category
+		self.name = name
+		self.colour = colour
+		self.price = price
+		self.init_tile()
+
+
+	def init_tile(self):
+		if self.category == "property":
+			self.banner = Canvas(self, bg = self.colour, bd = 0)
+			self.banner.place(relx=0, rely=0, relwidth=1, relheight=.25)
+
+			self.property_name = Label(self, text = self.name, font = ('Helvetica', 8), justify = CENTER, wraplength = self.width-4, padx=2)
+			self.property_name.place(relx=0, rely=.25)
+
+			self.show_pawns = Frame(self)
+			self.show_pawns.place(relx=0, rely=.55, relwidth=1, relheight=.10)
+
+			self.property_price = Label(self, text = self.price, font = ('Helvetica', 8))
+			self.property_price.place(relx=0, rely=.8)
 
 class Side2(Frame):
 	def __init__(self, parent=None):
-		Frame.__init__(self, parent, width = parent.width * (13/100), height = parent.height * (2/25), highlightthickness = 2, highlightbackground = "black") # correct ratios for side tile size            
+		Frame.__init__(self, parent, width = parent.parent.width * (13/100), height = parent.height * (2/25), highlightthickness = 1, highlightbackground = "black") # correct ratios for side tile size            
 		self.parent = parent
+
+class Side3(Frame):
+	def __init__(self, parent=None):
+		Frame.__init__(self, parent, width = parent.parent.width * (2/25), height = parent.height * (13/100), highlightthickness = 1, highlightbackground = "black") # correct ratios for side tile size            
+		self.parent = parent
+
+class Side4(Frame):
+	def __init__(self, parent=None):
+		Frame.__init__(self, parent, width = parent.parent.width * (2/25), height = parent.height * (13/100), highlightthickness = 1, highlightbackground = "black") # correct ratios for side tile size            
+		self.parent = parent
+
 
 #frame for corner tile (go to jail, jail, free parking, go)
 class Corner(Frame):
 	def __init__(self, parent=None):
-		Frame.__init__(self, parent, width = parent.width * (13/100), height = parent.height * (13/100), highlightthickness = 2, highlightbackground = "black") # correct ratios for corner tile size            
+		Frame.__init__(self, parent, width = parent.width * (13/100), height = parent.height * (13/100), highlightthickness = 1, highlightbackground = "black") # correct ratios for corner tile size            
 		self.parent = parent
 
-#Board will contain 11*11 grid
-class Board(Frame):
+class BoardImage(Canvas):
 	def __init__(self, parent=None, w=None, h=None):
-		Frame.__init__(self, parent, width=w, height=h, bd = 2, highlightthickness = 2, highlightbackground = "black")              
+		Canvas.__init__(self, parent, width=w, height=h) # correct ratios for corner tile size            
+		self.parent = parent
+		self.height = h
+		self.width = w
+
+#Board will contain 11*11 grid
+class BoardDisplay(Frame):
+	def __init__(self, parent, w=None, h=None, image=None, tiles=None, pawns=None):
+		Frame.__init__(self, parent, width=w, height=h, bd = 0, highlightthickness = 2, highlightbackground = "black")              
 		self.parent = parent
 		self.width = w
 		self.height = h
+		# self.background_img = ImageTk.PhotoImage(Image.open(image).resize((h, w), Image.ANTIALIAS)) #initialize board image
+		self.tiles = tiles
+		self.pawns = pawns
 		self.init_window()
-		self.setup()
+		self.build_tiles()
 
 	def init_window(self):
 		self.pack(fill = BOTH, expand = 1)
+		# self.board_canvas = BoardImage(self, self.width, self.height)
+		# self.board_canvas.place(x=0, y=0)
+		# self.board_canvas.background = self.background_img
+		# self.bg = self.board_canvas.create_image(0, 0, anchor=NW, image=self.background_img)
 
-	def setup(self):
-		# i = 40
-		# r = 11
-		# c = 11
-		# while i > 0:
-		# 	if i % 10 == 0:
-		# 		self.new_tile = Corner(self)
-		# 		self.new_tile.grid(row=r, column=c)
+	def find_corner(self, position):
+		r = 0
+		c = 0
+		if position % 9 == 0:
+			r = 11
+			c = 11
+		elif position % 9 == 1:
+			r = 11
+			c = 1
+		elif position % 9 == 2:
+			r = 1
+			c = 1
+		elif position % 9 == 3:
+			r = 1
+			c = 11
 
-		# 		if c > 0 and r == 11:
-		# 			c -= 1
-		# 		elif c == 0 and r > 0:
-		# 			r -= 1
-		# 		elif c < 11 and r == 0:
-		# 			c += 1
-		# 		else:
-		# 			r += 1
-		# 	else:
-		# 		self.new_tile = Side(self)
-		# 		self.new_tile.grid(row=r, column=c)
+		return r, c
 
-		# 		if c > 0 and r == 11:
-		# 			c -= 1
-		# 		elif c == 0 and r > 0:
-		# 			r -= 1
-		# 		elif c < 11 and r == 0:
-		# 			c += 1
-		# 		else:
-		# 			r += 1
-
-		# 	i -= 1
-
-	#Bottom side of board
-		self.tile_00 = Corner(self)
-		self.tile_00.grid(row=11, column=11)
-
-		self.tile_01 = Side1(self)
-		self.tile_01.grid(row=11, column=10)
-
-		self.tile_02 = Side1(self)
-		self.tile_02.grid(row=11, column=9)
-
-		self.tile_03 = Side1(self)
-		self.tile_03.grid(row=11, column=8)
-
-		self.tile_04 = Side1(self)
-		self.tile_04.grid(row=11, column=7)
-
-		self.tile_05 = Side1(self)
-		self.tile_05.grid(row=11, column=6)
-
-		self.tile_06 = Side1(self)
-		self.tile_06.grid(row=11, column=5)
-
-		self.tile_07 = Side1(self)
-		self.tile_07.grid(row=11, column=4)
-
-		self.tile_08 = Side1(self)
-		self.tile_08.grid(row=11, column=3)
-
-		self.tile_09 = Side1(self)
-		self.tile_09.grid(row=11, column=2)
-
-		self.tile_10 = Corner(self)
-		self.tile_10.grid(row=11, column=1)
-
-
-	#Left side of board
-		self.tile_11 = Side2(self)
-		self.tile_11.grid(row=10, column=1)
-
-		self.tile_12 = Side2(self)
-		self.tile_12.grid(row=9, column=1)
-
-		self.tile_13 = Side2(self)
-		self.tile_13.grid(row=8, column=1)
-
-		self.tile_14 = Side2(self)
-		self.tile_14.grid(row=7, column=1)
-
-		self.tile_15 = Side2(self)
-		self.tile_15.grid(row=6, column=1)
-
-		self.tile_16 = Side2(self)
-		self.tile_16.grid(row=5, column=1)
-
-		self.tile_17 = Side2(self)
-		self.tile_17.grid(row=4, column=1)
-
-		self.tile_18 = Side2(self)
-		self.tile_18.grid(row=3, column=1)
-
-		self.tile_19 = Side2(self)
-		self.tile_19.grid(row=2, column=1)
-
-		self.tile_20 = Corner(self)
-		self.tile_20.grid(row=1, column=1)
-
-	#Top side of board
-		self.tile_21 = Side1(self)
-		self.tile_21.grid(row=1, column=2)
-
-		self.tile_22 = Side1(self)
-		self.tile_22.grid(row=1, column=3)
-
-		self.tile_23 = Side1(self)
-		self.tile_23.grid(row=1, column=4)
-
-		self.tile_24 = Side1(self)
-		self.tile_24.grid(row=1, column=5)
-
-		self.tile_25 = Side1(self)
-		self.tile_25.grid(row=1, column=6)
-
-		self.tile_26 = Side1(self)
-		self.tile_26.grid(row=1, column=7)
-
-		self.tile_27 = Side1(self)
-		self.tile_27.grid(row=1, column=8)
-
-		self.tile_28 = Side1(self)
-		self.tile_28.grid(row=1, column=9)
-
-		self.tile_29 = Side1(self)
-		self.tile_29.grid(row=1, column=10)
-
-		self.tile_30 = Corner(self)
-		self.tile_30.grid(row=1, column=11)
-
-	#Right side of board
-		self.tile_31 = Side2(self)
-		self.tile_31.grid(row=2, column=11)
-
-		self.tile_32 = Side2(self)
-		self.tile_32.grid(row=3, column=11)
-
-		self.tile_33 = Side2(self)
-		self.tile_33.grid(row=4, column=11)
-
-		self.tile_34 = Side2(self)
-		self.tile_34.grid(row=5, column=11)
-
-		self.tile_35 = Side2(self)
-		self.tile_35.grid(row=6, column=11)
-
-		self.tile_36 = Side2(self)
-		self.tile_36.grid(row=7, column=11)
-
-		self.tile_37 = Side2(self)
-		self.tile_37.grid(row=8, column=11)
-
-		self.tile_38 = Side2(self)
-		self.tile_38.grid(row=9, column=11)
-
-		self.tile_39 = Side2(self)
-		self.tile_39.grid(row=10, column=11)
+	def build_tiles(self):
+		for tile in self.tiles:
+			if tile.position % 10 == 0:
+				r, c = self.find_corner(tile.position)
+				Corner(self).grid(row=r, column=c)
+			elif  10 > tile.position > 0:
+				Side1(self, tile.category, tile.name, tile.colour, tile.price).grid(row=11, column=11-tile.position)
+			else:
+				print("oops!")
 
 
 class Controls(Frame):
@@ -351,7 +272,7 @@ class Information(Frame):
 
 def main():
 	root = Tk()
-	root.geometry("1300x600")
+	root.geometry("1366x680")
 
 	game_frame = Divider(root) # will occupy left of main window, contains monopoly board
 	interface_frame = Divider(root) # will occupy right of main window, contains controls and info
@@ -359,7 +280,30 @@ def main():
 	game_frame.pack(side = LEFT)
 	interface_frame.pack(side = BOTTOM)
 
-	board_frame = Board(game_frame, 600, 600)
+	board_dim = 680 #this is the side dimension for the monopoly board e.g. 600 x 600 square
+	img_path = "board.png"
+
+	#initialise board values
+	p_colours = ["magenta", "cyan", "black", "green"]
+	pawns = {}
+
+	for i in range(0, 4):
+		pawns[i] = Pawn(i, 0, p_colours[i])
+
+	tiles = []
+	tiles.append(Tile(0, 'go', 'Go'))
+	tiles.append(Tile(1, 'property', 'Nubar', 'brown', '60'))
+	tiles.append(Tile(2, 'community_chest', 'Community Chest'))
+	tiles.append(Tile(3, 'property', 'Larkfield', 'brown', '60'))
+	tiles.append(Tile(4, 'tax', 'Income Tax', None, '200'))
+	tiles.append(Tile(5, 'transport', 'Helix Bus Stop', None, '200'))
+	tiles.append(Tile(6, 'property', 'Business School', 'cyan', '100'))
+	tiles.append(Tile(7, 'chance', 'Chance'))
+	tiles.append(Tile(8, 'property', 'Business School', 'cyan', '100'))
+	tiles.append(Tile(9, 'property', 'Business School', 'cyan', '100'))
+	tiles.append(Tile(10, 'jail', 'Jail'))
+
+	board_frame = BoardDisplay(game_frame, board_dim, board_dim, img_path, tiles)
 	controls_frame = Controls(interface_frame)
 	information_frame = Information(interface_frame)
 
