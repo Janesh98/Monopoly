@@ -1,3 +1,5 @@
+from random import randint
+
 class Tile():
 	'''
 	category is the type of the tile. it can be property, chance, community_chest, police, jail, free_parking or go.
@@ -45,3 +47,15 @@ class Board():
 			s = str(self.pawns[pawn])
 			a.append(s)
 		return '\n'.join(a)
+
+
+class Dice():
+	def __init__(self):
+		self.d1 = 1
+		self.d2 = 1
+
+	def roll(self):
+		self.d1 = randint(1, 6)
+		self.d2 = randint(1, 6)
+		
+		return self.d1, self.d2

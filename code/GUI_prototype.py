@@ -1,41 +1,110 @@
 from tkinter import *
 from PIL import Image, ImageTk
-from board import Tile, Pawn, Board
+from board import Tile, Pawn, Board, Dice
 
-#general divider for UI layout
-class Divider(Frame):
-	def __init__(self, parent=None):
-		Frame.__init__(self, parent, bd = 2)             
+'''
+BOARD RELATED CLASSES
+Pawn Token Class
+Pawn Contaier Class - for showing pawns on a tile
+Tile Classes (Side, Corner)
+Board Display Class
+'''
+
+class PawnToken(Canvas): #REDUNDENT CLASS
+	def __init__(self, parent, colour):
+		Canvas.__init__(self, parent)
 		self.parent = parent
+		self.colour = colour
+		self.draw_pawn()
+
+	def draw_pawn(self):
+		points = [60, 10, 110, 60, 60, 110, 10, 60]
+		self.create_polygon(points, fill = self.colour)
+
+#This the container inside each tile which handles pawn placement
+class PawnContainer(Frame):
+	def __init__(self, parent):
+		Frame.__init__(self, parent)
+		self.parent = parent
+		self.pawn_tokens = []
+
+	def update_container(self, pawns):
+		for token in self.pawn_tokens:
+			token.destroy()
+		for pawn in pawns:
+			pawn_token = Label(self, bg = pawn.colour)
+			pawn_token.grid(row=1, column= pawn.pawn_id + 1)
+			self.pawn_tokens.append(pawn_token)
 
 #frames for side tile on board (property, chance, community chest)
 #width = parent.parent as it will get width from frame containing parent canvas
-class Side1(Frame):
-	def __init__(self, parent, category, name=None, colour=None, price=None):
+class Tile1(Frame):
+	def __init__(self, parent, position, category, name=None, colour=None, price=None):
 		Frame.__init__(self, parent, width = parent.width * (2/25), height = parent.height * (13/100), highlightthickness = 1, highlightbackground = "black") # correct ratios for side tile size            
 		self.parent = parent
+		self.position = position
 		self.width = parent.width * (2/25)
 		self.height = parent.height * (13/100)
 		self.category = category
 		self.name = name
 		self.colour = colour
 		self.price = price
+		self.pawns_on_tile = []
+		self.pawns_container = PawnContainer(self)
 		self.init_tile()
-
+		self.show_pawn()
 
 	def init_tile(self):
+		default_pawns_rel_height = .55
 		if self.category == "property":
 			self.banner = Canvas(self, bg = self.colour, bd = 0)
 			self.banner.place(relx=0, rely=0, relwidth=1, relheight=.25)
 
-			self.property_name = Label(self, text = self.name, font = ('Helvetica', 8), justify = CENTER, wraplength = self.width-4, padx=2)
+			self.property_name = Label(self, text = self.name, font = ('Helvetica', 7), justify = CENTER, wraplength = self.width-4, padx=2)
 			self.property_name.place(relx=0, rely=.25)
 
-			self.show_pawns = Frame(self)
-			self.show_pawns.place(relx=0, rely=.55, relwidth=1, relheight=.10)
+			self.pawns_container.place(relx=0, rely=default_pawns_rel_height, relwidth=1, relheight=.10)
 
-			self.property_price = Label(self, text = self.price, font = ('Helvetica', 8))
+			self.property_price = Label(self, text = self.price, font = ('Helvetica', 7))
 			self.property_price.place(relx=0, rely=.8)
+
+		elif self.category == "community_chest":
+			self.tile_name = Label(self, text = self.name, font = ('Helvetica', 7), justify = CENTER, wraplength = self.width-4, padx=2)
+			self.tile_name.place(relx=0, rely=.25)
+
+			self.pawns_container.place(relx=0, rely=default_pawns_rel_height, relwidth=1, relheight=.10)
+
+		elif self.category == "tax":
+			self.tile_name = Label(self, text = self.name, font = ('Helvetica', 7), justify = CENTER, wraplength = self.width-4, padx=2)
+			self.tile_name.place(relx=0, rely=.25)
+
+			self.pawns_container.place(relx=0, rely=default_pawns_rel_height, relwidth=1, relheight=.10)
+
+		elif self.category == "transport":
+			self.tile_name = Label(self, text = self.name, font = ('Helvetica', 7), justify = CENTER, wraplength = self.width-4, padx=2)
+			self.tile_name.place(relx=0, rely=.25)
+
+			self.pawns_container.place(relx=0, rely=default_pawns_rel_height, relwidth=1, relheight=.10)
+
+		elif self.category == "chance":
+			self.tile_name = Label(self, text = self.name, font = ('Helvetica', 7), justify = CENTER, wraplength = self.width-4, padx=2)
+			self.tile_name.place(relx=0, rely=.25)
+
+			self.pawns_container.place(relx=0, rely=default_pawns_rel_height, relwidth=1, relheight=.10)
+
+
+	def show_pawn(self):
+		for pawn in self.parent.pawns:
+			if pawn.position == self.position and pawn not in self.pawns_on_tile:
+				self.pawns_on_tile.append(pawn)
+			elif pawn in self.pawns_on_tile and pawn.position != self.position:
+				print("Pawn {} moved".format(pawn.pawn_id))
+				self.pawns_on_tile.pop(self.pawns_on_tile.index(pawn))
+
+		self.pawns_container.update_container(self.pawns_on_tile)
+
+	def __str__(self):
+		return("pos: {}, name: {}, pawns: {}".format(self.position, self.name, self.pawns_on_tile))
 
 class Side2(Frame):
 	def __init__(self, parent=None):
@@ -55,9 +124,39 @@ class Side4(Frame):
 
 #frame for corner tile (go to jail, jail, free parking, go)
 class Corner(Frame):
-	def __init__(self, parent=None):
+	def __init__(self, parent, position, category, name, img=None, price=None):
 		Frame.__init__(self, parent, width = parent.width * (13/100), height = parent.height * (13/100), highlightthickness = 1, highlightbackground = "black") # correct ratios for corner tile size            
 		self.parent = parent
+		self.position = position
+		self.width = parent.width * (13/100)
+		self.height = parent.height * (13/100)
+		self.category = category
+		self.name = name
+		self.img = img
+		self.price = price
+		self.pawns_on_tile = []
+		self.pawns_container = PawnContainer(self)
+		self.init_tile()
+		self.show_pawn()
+
+	def init_tile(self):
+		self.banner = Canvas(self, bg = 'red', bd = 0)
+		self.banner.place(relx=0, rely=0, relwidth=1, relheight=.25)
+
+		self.pawns_container.place(relx=0, rely=.6, relwidth=1, relheight=.1)
+
+	def show_pawn(self):
+		for pawn in self.parent.pawns:
+			if pawn.position == self.position and pawn not in self.pawns_on_tile:
+				self.pawns_on_tile.append(pawn)
+			elif pawn in self.pawns_on_tile and pawn.position != self.position:
+				print("Pawn {} moved".format(pawn.pawn_id))
+				self.pawns_on_tile.pop(self.pawns_on_tile.index(pawn))
+
+		self.pawns_container.update_container(self.pawns_on_tile)
+
+	def __str__(self):
+		return("pos: {}, name: {}, pawns: {}".format(self.position, self.name, self.pawns_on_tile))
 
 class BoardImage(Canvas):
 	def __init__(self, parent=None, w=None, h=None):
@@ -76,11 +175,13 @@ class BoardDisplay(Frame):
 		# self.background_img = ImageTk.PhotoImage(Image.open(image).resize((h, w), Image.ANTIALIAS)) #initialize board image
 		self.tiles = tiles
 		self.pawns = pawns
-		self.init_window()
-		self.build_tiles()
+		self.init_board()
+		self.display_tiles = self.build_tiles()
+		self.display_pawns = self.build_pawns()
 
-	def init_window(self):
+	def init_board(self):
 		self.pack(fill = BOTH, expand = 1)
+
 		# self.board_canvas = BoardImage(self, self.width, self.height)
 		# self.board_canvas.place(x=0, y=0)
 		# self.board_canvas.background = self.background_img
@@ -92,34 +193,62 @@ class BoardDisplay(Frame):
 		if position % 9 == 0:
 			r = 11
 			c = 11
+			pos = 0
 		elif position % 9 == 1:
 			r = 11
 			c = 1
+			pos = 1
 		elif position % 9 == 2:
 			r = 1
 			c = 1
+			pos = 2
 		elif position % 9 == 3:
 			r = 1
 			c = 11
+			pos = 3
 
-		return r, c
+		return r, c, pos
 
 	def build_tiles(self):
+		a = []
 		for tile in self.tiles:
 			if tile.position % 10 == 0:
-				r, c = self.find_corner(tile.position)
-				Corner(self).grid(row=r, column=c)
+				r, c, pos = self.find_corner(tile.position)
+				t = Corner(self, tile.position, tile.category, tile.name)
+				t.grid(row=r, column=c)
+				a.append(t)
 			elif  10 > tile.position > 0:
-				Side1(self, tile.category, tile.name, tile.colour, tile.price).grid(row=11, column=11-tile.position)
+				t = Tile1(self, tile.position, tile.category, tile.name, tile.colour, tile.price)
+				t.grid(row=11, column=11-tile.position)
+				a.append(t)
 			else:
 				print("oops!")
 
+		return a
+
+	def build_pawns(self):
+		a = []
+		for pawn in self.pawns:
+			a.append(PawnToken(self.display_tiles[1], pawn.colour))
+
+		return a
+
+	def refresh(self, pawns):
+		pass
+
+'''
+INTERFACE RELATED CLASSES
+Controls Class
+Property Info Class
+'''
 
 class Controls(Frame):
-	def __init__(self, parent=None):
+	def __init__(self, parent, board):
 		Frame.__init__(self, parent, highlightthickness = 2, highlightbackground = "black", bd = 2)             
 		self.parent = parent
 		self.root = parent.parent
+		self.board = board
+		self.dice = Dice()
 		self.init_window()
 		self.buttons()
 
@@ -129,16 +258,38 @@ class Controls(Frame):
 	def do_something(self):
 		print("Foo")
 
+	def roll_com(self):
+		d1, d2 = self.dice.roll()
+		print("Rolled {}:{}".format(d1, d2))
+		n = d1 + d2
+		self.board.pawns[0].move(n)
+		for d_tile in self.board.display_tiles:
+			d_tile.show_pawn()
+
+
+	def test_move_pawn(self):
+		self.board.pawns[0].move(2)
+		for d_tile in self.board.display_tiles:
+			d_tile.show_pawn()
+
+	def test_com1(self):
+		print(self.board.pawns[0])
+
+	def test_com2(self):
+		print(len(self.board.display_tiles))
+		for d_tile in self.board.display_tiles:
+			print(d_tile)
+
 	def buttons(self):
 		default_width = 18
 
-		self.roll = Button(self, text ="ROLL", fg = "black", width = default_width, command = self.do_something)
+		self.roll = Button(self, text ="ROLL", fg = "black", width = default_width, command = self.roll_com)
 		self.roll.grid(row=1, column=1)
 
-		self.buy = Button(self, text ="BUY", fg = "black", width = default_width, command = self.do_something)
+		self.buy = Button(self, text ="BUY", fg = "black", width = default_width, command = self.test_com1)
 		self.buy.grid(row=1, column=2)
 
-		self.sell = Button(self, text ="SELL", fg = "black", width = default_width, command = self.do_something)
+		self.sell = Button(self, text ="SELL", fg = "black", width = default_width, command = self.test_com2)
 		self.sell.grid(row=1, column=3)
 
 		self.bail = Button(self, text ="BAIL", fg = "black", width = default_width, command = self.do_something)
@@ -270,6 +421,12 @@ class Information(Frame):
 		self.property_22.grid(row=5, column=2, padx=1, pady=4)
 
 
+#general divider for UI layout
+class Divider(Frame):
+	def __init__(self, parent=None):
+		Frame.__init__(self, parent, bd = 2)             
+		self.parent = parent
+
 def main():
 	root = Tk()
 	root.geometry("1366x680")
@@ -285,26 +442,27 @@ def main():
 
 	#initialise board values
 	p_colours = ["magenta", "cyan", "black", "green"]
-	pawns = {}
+	pawns = []
 
 	for i in range(0, 4):
-		pawns[i] = Pawn(i, 0, p_colours[i])
+		pawns.append(Pawn(i, 0, p_colours[i]))
 
 	tiles = []
 	tiles.append(Tile(0, 'go', 'Go'))
 	tiles.append(Tile(1, 'property', 'Nubar', 'brown', '60'))
-	tiles.append(Tile(2, 'community_chest', 'Community Chest'))
+	tiles.append(Tile(2, 'community_chest', 'C. Chest'))
 	tiles.append(Tile(3, 'property', 'Larkfield', 'brown', '60'))
-	tiles.append(Tile(4, 'tax', 'Income Tax', None, '200'))
+	tiles.append(Tile(4, 'tax', 'Inc. Tax', None, '200'))
 	tiles.append(Tile(5, 'transport', 'Helix Bus Stop', None, '200'))
 	tiles.append(Tile(6, 'property', 'Business School', 'cyan', '100'))
 	tiles.append(Tile(7, 'chance', 'Chance'))
-	tiles.append(Tile(8, 'property', 'Business School', 'cyan', '100'))
-	tiles.append(Tile(9, 'property', 'Business School', 'cyan', '100'))
+	tiles.append(Tile(8, 'property', 'Henry Grattan', 'cyan', '100'))
+	tiles.append(Tile(9, 'property', 'T. Larkin Theatre', 'cyan', '100'))
 	tiles.append(Tile(10, 'jail', 'Jail'))
 
-	board_frame = BoardDisplay(game_frame, board_dim, board_dim, img_path, tiles)
-	controls_frame = Controls(interface_frame)
+	board_frame = BoardDisplay(game_frame, board_dim, board_dim, img_path, tiles, pawns)
+
+	controls_frame = Controls(interface_frame, board_frame) #interface_frame = parent, board_frame = internal reference of board for using commands on
 	information_frame = Information(interface_frame)
 
 	root.mainloop()
