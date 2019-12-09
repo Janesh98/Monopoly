@@ -60,8 +60,14 @@ class Tile1(Frame):
 			self.banner = Canvas(self, bg = self.colour, bd = 0)
 			self.banner.place(relx=0, rely=0, relwidth=1, relheight=.25)
 
-			self.property_name = Label(self, text = self.name, font = ('Helvetica', 7), justify = CENTER, wraplength = self.width-4, padx=2)
-			self.property_name.place(relx=0, rely=.25)
+			#code for putting text on canvas to allow rotation
+			# self.property_name = Canvas(self, bg = None)
+			# self.property_txt = self.property_name.create_text(20, 10, font = ('Helvetica', 7), width = self.width - 15, justify = CENTER)
+			# self.property_name.insert(self.property_txt, 7, self.name)
+			# self.property_name.place(relx=0, rely=.25)
+
+			self.tile_name = Label(self, text = self.name, font = ('Helvetica', 7), justify = CENTER, wraplength = self.width-4, padx=2)
+			self.tile_name.place(relx=0, rely=.25)
 
 			self.pawns_container.place(relx=0, rely=default_pawns_rel_height, relwidth=1, relheight=.10)
 
@@ -92,7 +98,6 @@ class Tile1(Frame):
 
 			self.pawns_container.place(relx=0, rely=default_pawns_rel_height, relwidth=1, relheight=.10)
 
-
 	def show_pawn(self):
 		for pawn in self.parent.pawns:
 			if pawn.position == self.position and pawn not in self.pawns_on_tile:
@@ -106,21 +111,148 @@ class Tile1(Frame):
 	def __str__(self):
 		return("pos: {}, name: {}, pawns: {}".format(self.position, self.name, self.pawns_on_tile))
 
-class Side2(Frame):
-	def __init__(self, parent=None):
-		Frame.__init__(self, parent, width = parent.parent.width * (13/100), height = parent.height * (2/25), highlightthickness = 1, highlightbackground = "black") # correct ratios for side tile size            
+class Tile2(Tile1):
+	def __init__(self, parent, position, category, name=None, colour=None, price=None):
+		Frame.__init__(self, parent, width = parent.width * (13/100), height = parent.height * (2/25), highlightthickness = 1, highlightbackground = "black") # correct ratios for side tile size            
 		self.parent = parent
+		self.position = position
+		self.width = parent.width * (13/100)
+		self.height = parent.height * (2/25)
+		self.category = category
+		self.name = name
+		self.colour = colour
+		self.price = price
+		self.pawns_on_tile = []
+		self.pawns_container = PawnContainer(self)
+		self.init_tile()
+		self.show_pawn()
 
-class Side3(Frame):
-	def __init__(self, parent=None):
-		Frame.__init__(self, parent, width = parent.parent.width * (2/25), height = parent.height * (13/100), highlightthickness = 1, highlightbackground = "black") # correct ratios for side tile size            
+	def init_tile(self):
+		default_pawns_rel_height = 0
+		if self.category == "property":
+			self.banner = Canvas(self, bg = self.colour, bd = 0)
+			self.banner.place(relx=.75, rely=0, relwidth=.25, relheight=1)
+
+			self.property_name = Label(self, text = self.name, font = ('Helvetica', 7), justify = CENTER, wraplength = self.width-4, padx=2)
+			self.property_name.place(relx=0, rely=.1)
+
+			self.pawns_container.place(relx=default_pawns_rel_height, rely=.4, relwidth=1, relheight=.10)
+
+			self.property_price = Label(self, text = self.price, font = ('Helvetica', 7))
+			self.property_price.place(relx=0, rely=.7)
+
+		elif self.category == "community_chest":
+			self.tile_name = Label(self, text = self.name, font = ('Helvetica', 7), justify = CENTER, wraplength = self.width-4, padx=2)
+			self.tile_name.place(relx=0, rely=.25)
+
+			self.pawns_container.place(relx=0, rely=default_pawns_rel_height, relwidth=1, relheight=.10)
+
+		elif self.category == "transport":
+			self.tile_name = Label(self, text = self.name, font = ('Helvetica', 7), justify = CENTER, wraplength = self.width-4, padx=2)
+			self.tile_name.place(relx=0, rely=.1)
+
+			self.pawns_container.place(relx=0, rely=default_pawns_rel_height, relwidth=1, relheight=.10)
+
+			self.property_price = Label(self, text = self.price, font = ('Helvetica', 7))
+			self.property_price.place(relx=0, rely=.7)
+
+
+class Tile3(Tile1):
+	def __init__(self, parent, position, category, name=None, colour=None, price=None):
+		Frame.__init__(self, parent, width = parent.width * (2/25), height = parent.height * (13/100), highlightthickness = 1, highlightbackground = "black") # correct ratios for side tile size            
 		self.parent = parent
+		self.position = position
+		self.width = parent.width * (2/25)
+		self.height = parent.height * (13/100)
+		self.category = category
+		self.name = name
+		self.colour = colour
+		self.price = price
+		self.pawns_on_tile = []
+		self.pawns_container = PawnContainer(self)
+		self.init_tile()
+		self.show_pawn()
 
-class Side4(Frame):
-	def __init__(self, parent=None):
-		Frame.__init__(self, parent, width = parent.parent.width * (2/25), height = parent.height * (13/100), highlightthickness = 1, highlightbackground = "black") # correct ratios for side tile size            
+	def init_tile(self):
+		default_pawns_rel_height = .35
+		if self.category == "property":
+			self.banner = Canvas(self, bg = self.colour, bd = 0)
+			self.banner.place(relx=0, rely=.75, relwidth=1, relheight=.25)
+
+			self.tile_name = Label(self, text = self.name, font = ('Helvetica', 7), justify = CENTER, wraplength = self.width-4, padx=2)
+			self.tile_name.place(relx=0, rely=0)
+
+			self.pawns_container.place(relx=0, rely=default_pawns_rel_height, relwidth=1, relheight=.10)
+
+			self.property_price = Label(self, text = self.price, font = ('Helvetica', 7))
+			self.property_price.place(relx=0, rely=.6)
+
+		elif self.category == "transport":
+			self.tile_name = Label(self, text = self.name, font = ('Helvetica', 7), justify = CENTER, wraplength = self.width-4, padx=2)
+			self.tile_name.place(relx=0, rely=0)
+
+			self.pawns_container.place(relx=0, rely=default_pawns_rel_height, relwidth=1, relheight=.10)
+
+		elif self.category == "chance":
+			self.tile_name = Label(self, text = self.name, font = ('Helvetica', 7), justify = CENTER, wraplength = self.width-4, padx=2)
+			self.tile_name.place(relx=0, rely=0)
+
+			self.pawns_container.place(relx=0, rely=default_pawns_rel_height, relwidth=1, relheight=.10)
+
+class Tile4(Tile1):
+	def __init__(self, parent, position, category, name=None, colour=None, price=None):
+		Frame.__init__(self, parent, width = parent.width * (13/100), height = parent.height * (2/25), highlightthickness = 1, highlightbackground = "black") # correct ratios for side tile size            
 		self.parent = parent
+		self.position = position
+		self.width = parent.width * (13/100)
+		self.height = parent.height * (2/25)
+		self.category = category
+		self.name = name
+		self.colour = colour
+		self.price = price
+		self.pawns_on_tile = []
+		self.pawns_container = PawnContainer(self)
+		self.init_tile()
+		self.show_pawn()
 
+	def init_tile(self):
+		default_pawns_rel_height = .25
+		if self.category == "property":
+			self.banner = Canvas(self, bg = self.colour, bd = 0)
+			self.banner.place(relx=0, rely=0, relwidth=.25, relheight=1)
+
+			self.property_name = Label(self, text = self.name, font = ('Helvetica', 7), justify = CENTER, wraplength = self.width-4, padx=2)
+			self.property_name.place(relx=.25, rely=.1)
+
+			self.pawns_container.place(relx=default_pawns_rel_height, rely=.4, relwidth=1, relheight=.10)
+
+			self.property_price = Label(self, text = self.price, font = ('Helvetica', 7))
+			self.property_price.place(relx=.3, rely=.7)
+
+		elif self.category == "community_chest":
+			self.tile_name = Label(self, text = self.name, font = ('Helvetica', 7), justify = CENTER, wraplength = self.width-4, padx=2)
+			self.tile_name.place(relx=0, rely=.25)
+
+			self.pawns_container.place(relx=0, rely=default_pawns_rel_height, relwidth=1, relheight=.10)
+
+		elif self.category == "chance":
+			self.tile_name = Label(self, text = self.name, font = ('Helvetica', 7), justify = CENTER, wraplength = self.width-4, padx=2)
+			self.tile_name.place(relx=0, rely=0)
+
+			self.pawns_container.place(relx=0, rely=default_pawns_rel_height, relwidth=1, relheight=.10)
+
+		elif self.category == "tax":
+			self.tile_name = Label(self, text = self.name, font = ('Helvetica', 7), justify = CENTER, wraplength = self.width-4, padx=2)
+			self.tile_name.place(relx=0, rely=.25)
+
+		elif self.category == "transport":
+			self.tile_name = Label(self, text = self.name, font = ('Helvetica', 7), justify = CENTER, wraplength = self.width-4, padx=2)
+			self.tile_name.place(relx=0, rely=.1)
+
+			self.pawns_container.place(relx=0, rely=default_pawns_rel_height, relwidth=1, relheight=.10)
+
+			self.property_price = Label(self, text = self.price, font = ('Helvetica', 7))
+			self.property_price.place(relx=0, rely=.7)
 
 #frame for corner tile (go to jail, jail, free parking, go)
 class Corner(Frame):
@@ -140,8 +272,6 @@ class Corner(Frame):
 		self.show_pawn()
 
 	def init_tile(self):
-		self.banner = Canvas(self, bg = 'red', bd = 0)
-		self.banner.place(relx=0, rely=0, relwidth=1, relheight=.25)
 
 		self.pawns_container.place(relx=0, rely=.6, relwidth=1, relheight=.1)
 
@@ -220,6 +350,18 @@ class BoardDisplay(Frame):
 			elif  10 > tile.position > 0:
 				t = Tile1(self, tile.position, tile.category, tile.name, tile.colour, tile.price)
 				t.grid(row=11, column=11-tile.position)
+				a.append(t)
+			elif  20 > tile.position > 10:
+				t = Tile2(self, tile.position, tile.category, tile.name, tile.colour, tile.price)
+				t.grid(row=11-(tile.position - 10), column=1)
+				a.append(t)
+			elif  30 > tile.position > 20:
+				t = Tile3(self, tile.position, tile.category, tile.name, tile.colour, tile.price)
+				t.grid(row=1, column=1+(tile.position - 20))
+				a.append(t)
+			elif  40 > tile.position > 30:
+				t = Tile4(self, tile.position, tile.category, tile.name, tile.colour, tile.price)
+				t.grid(row=1+(tile.position - 30), column=11)
 				a.append(t)
 			else:
 				print("oops!")
@@ -429,7 +571,7 @@ class Divider(Frame):
 
 def main():
 	root = Tk()
-	root.geometry("1366x680")
+	root.geometry("1366x700")
 
 	game_frame = Divider(root) # will occupy left of main window, contains monopoly board
 	interface_frame = Divider(root) # will occupy right of main window, contains controls and info
@@ -437,7 +579,7 @@ def main():
 	game_frame.pack(side = LEFT)
 	interface_frame.pack(side = BOTTOM)
 
-	board_dim = 680 #this is the side dimension for the monopoly board e.g. 600 x 600 square
+	board_dim = 700 #this is the side dimension for the monopoly board e.g. 600 x 600 square
 	img_path = "board.png"
 
 	#initialise board values
@@ -459,6 +601,35 @@ def main():
 	tiles.append(Tile(8, 'property', 'Henry Grattan', 'cyan', '100'))
 	tiles.append(Tile(9, 'property', 'T. Larkin Theatre', 'cyan', '100'))
 	tiles.append(Tile(10, 'jail', 'Jail'))
+	tiles.append(Tile(11, 'property', 'DCU Canteen', 'magenta', '140'))
+	tiles.append(Tile(12, 'transport', 'DCU Library', None, '150'))
+	tiles.append(Tile(13, 'property', 'Interfaith', 'magenta', '140'))
+	tiles.append(Tile(14, 'property', 'Albert College', 'magenta', '160'))
+	tiles.append(Tile(15, 'transport', 'St Pats Bus Stop', None, '200'))
+	tiles.append(Tile(16, 'property', 'Nursing', 'orange', '180'))
+	tiles.append(Tile(17, 'community_chest', 'C. Chest'))
+	tiles.append(Tile(18, 'property', 'Lonsdale', 'orange', '180'))
+	tiles.append(Tile(19, 'property', 'Estates Office', 'orange', '200'))
+	tiles.append(Tile(20, 'free_parking', 'Free Parking'))
+	tiles.append(Tile(21, 'property', 'Londis', 'red', '220'))
+	tiles.append(Tile(22, 'chance', 'Chance'))
+	tiles.append(Tile(23, 'property', 'The U', 'red', '220'))
+	tiles.append(Tile(24, 'property', 'Hampstead', 'red', '240'))
+	tiles.append(Tile(25, 'transport', 'Ballymun Bus Stop', None, '200'))
+	tiles.append(Tile(26, 'property', 'Purcell House', 'yellow', '260'))
+	tiles.append(Tile(27, 'transport', 'DCU Sport', None, '150'))
+	tiles.append(Tile(28, 'property', 'All Hallows', 'yellow', '260'))
+	tiles.append(Tile(29, 'property', 'St Pats', 'yellow', '280'))
+	tiles.append(Tile(30, 'goto_jail', 'Go To Jail!'))
+	tiles.append(Tile(31, 'property', 'Stokes', 'green', '300'))
+	tiles.append(Tile(32, 'property', 'Campus Store', 'green', '300'))
+	tiles.append(Tile(33, 'community_chest', 'C. Chest'))
+	tiles.append(Tile(34, 'property', 'The Helix', 'green', '320'))
+	tiles.append(Tile(35, 'transport', 'Collins Av Bus Stop', None, '200'))
+	tiles.append(Tile(36, 'chance', 'Chance'))
+	tiles.append(Tile(37, 'property', 'McNulty Building', 'blue', '350'))
+	tiles.append(Tile(38, 'tax', 'Super Tax', None, '100'))
+	tiles.append(Tile(39, 'property', 'College Park', 'blue', '400'))
 
 	board_frame = BoardDisplay(game_frame, board_dim, board_dim, img_path, tiles, pawns)
 

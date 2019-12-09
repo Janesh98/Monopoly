@@ -27,7 +27,10 @@ class Pawn():
 		return self.position
 
 	def move(self, moves):
-		self.position += moves
+		if self.position + moves > 39:
+			self.position = moves - 1
+		else:
+			self.position += moves
 
 	def __str__(self):
 		return "Pawn: {}, Position {}".format(self.pawn_id, self.position)
