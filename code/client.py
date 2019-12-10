@@ -1,6 +1,7 @@
 import socket
 import sys
 import threading
+import GUI as ui
 
 class Client:
     def __init__(self, address, port):
@@ -10,6 +11,8 @@ class Client:
         self.quit = False
         self.server_connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server_thread = None
+        self.ui_thread = None
+        self.commands = []
     
     
     def establish_connection(self, address, port):
@@ -51,7 +54,8 @@ class Client:
         self.establish_connection(self.address, self.port)
         
         ##########  SETUP TKINTER HERE  #############
-        
+        self.ui_thread = threading.Thread(target=ui.main, args=(self, ))
+        self.ui_thread.start()
         
         while not self.quit:       #Main game loop
             try:
