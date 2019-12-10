@@ -27,8 +27,8 @@ class Pawn():
 		return self.position
 
 	def move(self, moves):
-		if self.position + moves > 39:
-			self.position = moves - 1
+		if self.position + moves > 39: #if pos = 35, moves = 6 new_pos = 1, 
+			self.position = (self.position + moves) - 40
 		else:
 			self.position += moves
 
