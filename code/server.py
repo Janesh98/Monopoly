@@ -1,6 +1,7 @@
 import socket
 import threading
 import sys
+from random import randint
 
 class Server:
     def __init__(self, port="8000", players=6):
@@ -15,6 +16,9 @@ class Server:
         self.server_socket.bind((self.ip_addr, self.port))
         self.server_socket.listen(players)
         
+    def get_id(self, conn):
+        return self.connected_devices[conn]["addr"][1]
+
     def send_client(self, conn, message):
         conn.send(message.strip().encode())
         
@@ -28,6 +32,13 @@ class Server:
         self.connected_devices[conn]["thread"] = th
         #self.connected_devices[conn]["player"] = Player(conn)    #creates player object
     
+    def process_command(self, conn, mess):
+        if mess == "roll":
+            d1 = randint(1, 6)
+            d2 = randint(1, 6)
+            self.send_client(conn, "roll {} {}".format(d1, d2))
+            self.send_all("{} pos {}".format(self.get_id(conn), d1 + d2))
+
     def client_thread(self, conn, addr):        #each thread connects to each client
         #broadcast to other clients that a new player joined
         #broadcast(str(addr[1]) + "\n")
@@ -38,20 +49,20 @@ class Server:
         self.send_client(conn, "Welcome")
         
         while self.server_running:
-            try:
-                message = conn.recv(1024)           #receive client commands
-                if message:
-                    dec_message = message.decode()
-                    self.send_all(dec_message)      #echos message
-                    print(dec_message)              #for debugging
-                    #
-                    #game.process_command(dec_message)
-                    #
-                    #connected_devices[conn]["player"].client_command(dec_message)   #process client commands
-                else:
-                    pass
-            except:
+            #try:
+            message = conn.recv(1024)           #receive client commands
+            if message:
+                dec_message = message.decode()
+                #self.send_all(dec_message)      #echos message
+                print(dec_message)              #for debugging
+                #
+                self.process_command(conn, dec_message)
+                #
+                #connected_devices[conn]["player"].client_command(dec_message)   #process client commands
+            else:
                 pass
+            #except:
+            #    pass
 
     def run(self):
         try:

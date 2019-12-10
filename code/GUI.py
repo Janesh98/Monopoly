@@ -393,20 +393,21 @@ Property Info Class
 '''
 
 class Controls(Frame):
-    def __init__(self, parent, board):
-        Frame.__init__(self, parent, highlightthickness = 2, highlightbackground = "black", bd = 2)             
+    def __init__(self, parent, board, client = None):
+        Frame.__init__(self, parent, highlightthickness = 2, highlightbackground = "black", bd = 2)
         self.parent = parent
         self.root = parent.parent
         self.board = board
         self.dice = parent.dice
         self.init_window()
         self.buttons()
+        self.client = client    #parent client
 
     def init_window(self):
         self.pack(side = BOTTOM)
 
     def do_something(self):
-        print("Foo")
+        self.client.send_server("foo")
 
     def roll_com(self):
         d1, d2 = self.dice.roll()
@@ -417,6 +418,15 @@ class Controls(Frame):
         self.board.pawns[0].move(n)
         for d_tile in self.board.display_tiles:
             d_tile.show_pawn()
+
+    #sends a request for a roll to server
+    def request_roll(self):
+        self.client.send_server("roll")
+
+    #displays roll sent by server
+    def diaplay_dice(self, d1, d2):
+        self.parent.d1.set("Die 1: {}".format(d1))
+        self.parent.d2.set("Die 2: {}".format(d2))
 
     def test_move_pawn(self):
         self.board.pawns[1].move(1)
@@ -431,10 +441,14 @@ class Controls(Frame):
         for d_tile in self.board.display_tiles:
             print(d_tile)
 
+    def abandon(self):
+        self.client.send_server("quit")
+        self.root.destroy()
+
     def buttons(self):
         default_width = 18
 
-        self.roll = Button(self, text ="ROLL", fg = "black", width = default_width, command = self.roll_com)
+        self.roll = Button(self, text ="ROLL", fg = "black", width = default_width, command = self.request_roll)
         self.roll.grid(row=1, column=1)
 
         self.buy = Button(self, text ="BUY", fg = "black", width = default_width, command = self.test_com1)
@@ -452,7 +466,7 @@ class Controls(Frame):
         self.mortgage = Button(self, text ="MORTGAGE", fg = "black", width = default_width, command = self.do_something)
         self.mortgage.grid(row=2, column=3)        
 
-        self.abandon = Button(self, text ="ABANDON", fg = "red", width = default_width, command = self.root.destroy)
+        self.abandon = Button(self, text ="ABANDON", fg = "red", width = default_width, command = self.abandon)
         self.abandon.grid(row=2, column=4)
 
 
@@ -593,8 +607,6 @@ class Divider(Frame):
         self.d2 = StringVar()
 
 def main(parent=None):
-    client = parent
-
     root = Tk()
     root.geometry("1366x700")
     root.configure(bg = "white")
@@ -660,7 +672,7 @@ def main(parent=None):
 
     board_frame = BoardDisplay(game_divider, board_dim, board_dim, img_path, tiles, pawns)
 
-    controls_frame = Controls(interface_divider, board_frame) #interface_divider = parent, board_frame = internal reference of board for using commands on
+    controls_frame = Controls(interface_divider, board_frame, parent) #interface_divider = parent, board_frame = internal reference of board for using commands on
     information_frame = Information(interface_divider)
 
     root.mainloop()

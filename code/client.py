@@ -59,7 +59,7 @@ class Client:
         
         while not self.quit:       #Main game loop
             try:
-                inp = input()
+                inp = input()   #for testing
                 self.send_server(inp)
                 
                 #
