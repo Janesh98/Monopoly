@@ -408,7 +408,7 @@ class Controls(Frame):
 
     def do_something(self):
         self.client.send_server("foo")
-
+    '''
     def roll_com(self):
         d1, d2 = self.dice.roll()
         self.parent.d1.set("Die 1: {}".format(d1))
@@ -418,12 +418,19 @@ class Controls(Frame):
         self.board.pawns[0].move(n)
         for d_tile in self.board.display_tiles:
             d_tile.show_pawn()
-
+    '''
+    #process command from server
     def process(self, command):
         tokens = command.strip().split()
 
         if tokens[0] == "roll":
             self.display_dice(int(tokens[1]),int(tokens[2]))
+        elif tokens[0].isdigit():
+            if tokens[1] == "move":
+                # move pawn by int
+                self.board.pawns[0].move(int(tokens[2]))
+                for d_tile in self.board.display_tiles:
+                    d_tile.show_pawn()
 
     #sends a request for a roll to server
     def request_roll(self):

@@ -20,7 +20,7 @@ class Server:
         return self.connected_devices[conn]["addr"][1]
 
     def send_client(self, conn, message):
-        conn.send(message.strip().encode())
+        conn.send("{}\n".format(message.strip()).encode())  #each command split by \n
         
     def send_all(self, message):
         for conn in self.connected_devices.keys():
@@ -37,14 +37,9 @@ class Server:
             d1 = randint(1, 6)
             d2 = randint(1, 6)
             self.send_client(conn, "roll {} {}".format(d1, d2))
-            self.send_all("{} pos {}".format(self.get_id(conn), d1 + d2))
+            self.send_all("{} move {}".format(self.get_id(conn), d1 + d2))
 
     def client_thread(self, conn, addr):        #each thread connects to each client
-        #broadcast to other clients that a new player joined
-        #broadcast(str(addr[1]) + "\n")
-        
-        #send server info (setup client)
-        #send_server_info(conn)
         #welcome message and client id
         self.send_client(conn, "Welcome")
         
@@ -52,13 +47,13 @@ class Server:
             #try:
             message = conn.recv(1024)           #receive client commands
             if message:
-                dec_message = message.decode()
-                #self.send_all(dec_message)      #echos message
-                print(dec_message)              #for debugging
-                #
-                self.process_command(conn, dec_message)
-                #
-                #connected_devices[conn]["player"].client_command(dec_message)   #process client commands
+                for command in message.decode().strip().split("\n"):
+                    #self.send_all(dec_message)      #echos message
+                    print(command)              #for debugging
+                    #
+                    self.process_command(conn, command)
+                    #
+                    #connected_devices[conn]["player"].client_command(dec_message)   #process client commands
             else:
                 pass
             #except:

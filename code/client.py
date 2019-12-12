@@ -30,15 +30,12 @@ class Client:
             try:
                 message = self.server_connection.recv(1024) #receive server commands
                 if message:
-                    dec_message = message.decode()
-                    print(dec_message)              #for debugging
-                    #
-                    #######  PROCESS COMMAND FROM SERVER  ########
-                    self.ui_controls.process(dec_message)
-                    #######  UPDATE GAME AND PLAYER VARIABLES  #######
-                    #
-                    #######  UPDATE TKINTER WINDOW  ########
-                    #
+                    for command in message.decode().strip().split("\n"):
+                        print(command)              #for debugging
+                        #
+                        #######  PROCESS COMMAND FROM SERVER  ########
+                        self.ui_controls.process(command)
+                        #
                 else:
                     pass
             except:
@@ -46,8 +43,7 @@ class Client:
     
     
     def send_server(self, message):
-        self.server_connection.send(message.strip().encode())
-    
+        self.server_connection.send("{}\n".format(message.strip()).encode())
     
     def run(self):
     
