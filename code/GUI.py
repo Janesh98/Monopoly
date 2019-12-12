@@ -419,12 +419,18 @@ class Controls(Frame):
         for d_tile in self.board.display_tiles:
             d_tile.show_pawn()
 
+    def process(self, command):
+        tokens = command.strip().split()
+
+        if tokens[0] == "roll":
+            self.display_dice(int(tokens[1]),int(tokens[2]))
+
     #sends a request for a roll to server
     def request_roll(self):
         self.client.send_server("roll")
 
     #displays roll sent by server
-    def diaplay_dice(self, d1, d2):
+    def display_dice(self, d1, d2):
         self.parent.d1.set("Die 1: {}".format(d1))
         self.parent.d2.set("Die 2: {}".format(d2))
 
@@ -671,8 +677,10 @@ def main(parent=None):
     tiles.append(Tile(39, 'property', 'College Park', 'blue', '400'))
 
     board_frame = BoardDisplay(game_divider, board_dim, board_dim, img_path, tiles, pawns)
-
-    controls_frame = Controls(interface_divider, board_frame, parent) #interface_divider = parent, board_frame = internal reference of board for using commands on
+    
+    #interface_divider = parent, board_frame = internal reference of board for using commands on
+    controls_frame = Controls(interface_divider, board_frame, parent)
+    parent.ui_controls = controls_frame
     information_frame = Information(interface_divider)
 
     root.mainloop()

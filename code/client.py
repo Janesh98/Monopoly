@@ -12,7 +12,7 @@ class Client:
         self.server_connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server_thread = None
         self.ui_thread = None
-        self.commands = []
+        self.ui_controls = None
     
     
     def establish_connection(self, address, port):
@@ -34,7 +34,7 @@ class Client:
                     print(dec_message)              #for debugging
                     #
                     #######  PROCESS COMMAND FROM SERVER  ########
-                    #
+                    self.ui_controls.process(dec_message)
                     #######  UPDATE GAME AND PLAYER VARIABLES  #######
                     #
                     #######  UPDATE TKINTER WINDOW  ########
