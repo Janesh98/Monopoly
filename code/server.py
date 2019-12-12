@@ -4,6 +4,8 @@ import sys
 from random import randint
 from board import Pawn
 
+p_colours = ["magenta", "cyan", "black", "green"]
+
 class Server:
     def __init__(self, port="8000", players=6):
         self.ip_addr = ""
@@ -29,7 +31,7 @@ class Server:
                 self.send_client(conn, message)
         
     def start_client_thread(self, conn, address):          #starts client thread that listens to a client
-        self.connected_devices[conn]["pawn"] = Pawn(address[1], 0, "cyan")      #creates pawn object
+        self.connected_devices[conn]["pawn"] = Pawn(address[1], 0, p_colours[len(self.connected_devices)%4])      #creates pawn object
         self.send_all(self.connected_devices[conn]["pawn"].info(), conn)        #broadcast info about new pawn
         #start thread
         th = threading.Thread(target=self.client_thread, args=(conn, address))
