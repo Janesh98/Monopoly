@@ -1,6 +1,8 @@
 import socket
 import sys
 import threading
+import GUI as ui
+import time
 
 class Client:
     def __init__(self, address, port):
@@ -10,6 +12,9 @@ class Client:
         self.quit = False
         self.server_connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server_thread = None
+        self.ui_thread = None
+        self.ui_controls = None
+        self.ui_ready = False
     
     
     def establish_connection(self, address, port):
@@ -23,39 +28,40 @@ class Client:
     
     
     def listen_thread(self):
+        #wait for ui
+        while not self.ui_ready:
+            time.sleep(0.1)
+
         while self.connected:
-            try:
-                message = self.server_connection.recv(1024) #receive server commands
-                if message:
-                    dec_message = message.decode()
-                    print(dec_message)              #for debugging
+            #try:
+            message = self.server_connection.recv(1024) #receive server commands
+            if message:
+                for command in message.decode().strip().split("\n"):
+                    print(command)              #for debugging
                     #
                     #######  PROCESS COMMAND FROM SERVER  ########
+                    self.ui_controls.process(command)
                     #
-                    #######  UPDATE GAME AND PLAYER VARIABLES  #######
-                    #
-                    #######  UPDATE TKINTER WINDOW  ########
-                    #
-                else:
-                    pass
-            except:
+            else:
                 pass
+            #except:
+            #    pass
     
     
     def send_server(self, message):
-        self.server_connection.send(message.strip().encode())
-    
+        self.server_connection.send("{}\n".format(message.strip()).encode())
     
     def run(self):
     
         self.establish_connection(self.address, self.port)
         
         ##########  SETUP TKINTER HERE  #############
-        
+        self.ui_thread = threading.Thread(target=ui.main, args=(self, ))
+        self.ui_thread.start()
         
         while not self.quit:       #Main game loop
             try:
-                inp = input()
+                inp = input()   #for testing
                 self.send_server(inp)
                 
                 #
