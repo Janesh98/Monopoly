@@ -2,6 +2,7 @@ import socket
 import sys
 import threading
 import GUI as ui
+import time
 
 class Client:
     def __init__(self, address, port):
@@ -13,6 +14,7 @@ class Client:
         self.server_thread = None
         self.ui_thread = None
         self.ui_controls = None
+        self.ui_ready = False
     
     
     def establish_connection(self, address, port):
@@ -26,20 +28,24 @@ class Client:
     
     
     def listen_thread(self):
+        #wait for ui
+        while not self.ui_ready:
+            time.sleep(0.1)
+
         while self.connected:
-            try:
-                message = self.server_connection.recv(1024) #receive server commands
-                if message:
-                    for command in message.decode().strip().split("\n"):
-                        print(command)              #for debugging
-                        #
-                        #######  PROCESS COMMAND FROM SERVER  ########
-                        self.ui_controls.process(command)
-                        #
-                else:
-                    pass
-            except:
+            #try:
+            message = self.server_connection.recv(1024) #receive server commands
+            if message:
+                for command in message.decode().strip().split("\n"):
+                    print(command)              #for debugging
+                    #
+                    #######  PROCESS COMMAND FROM SERVER  ########
+                    self.ui_controls.process(command)
+                    #
+            else:
                 pass
+            #except:
+            #    pass
     
     
     def send_server(self, message):

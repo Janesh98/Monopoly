@@ -32,10 +32,12 @@ class PawnContainer(Frame):
     def update_container(self, pawns):
         for token in self.pawn_tokens:
             token.destroy()
+        i = 0
         for pawn in pawns:
             pawn_token = Label(self, bg = pawn.colour)
-            pawn_token.grid(row=1, column= pawn.pawn_id + 1, ipadx=2, ipady=2, padx=1)
+            pawn_token.grid(row=1, column= i + 1, ipadx=2, ipady=2, padx=1)
             self.pawn_tokens.append(pawn_token)
+            i += 1
 
 #frames for side tile on board (property, chance, community chest)
 #width = parent.parent as it will get width from frame containing parent canvas
@@ -100,7 +102,7 @@ class Tile1(Frame):
             self.pawns_container.place(relx=0, rely=default_pawns_rel_height, relwidth=1, relheight=.10)
 
     def show_pawn(self):
-        for pawn in self.parent.pawns:
+        for pawn in self.parent.pawns.values():
             if pawn.position == self.position and pawn not in self.pawns_on_tile:
                 self.pawns_on_tile.append(pawn)
             elif pawn in self.pawns_on_tile and pawn.position != self.position:
@@ -284,7 +286,7 @@ class Corner(Frame):
         self.pawns_container.lift()
 
     def show_pawn(self):
-        for pawn in self.parent.pawns:
+        for pawn in self.parent.pawns.values():
             if pawn.position == self.position and pawn not in self.pawns_on_tile:
                 self.pawns_on_tile.append(pawn)
             elif pawn in self.pawns_on_tile and pawn.position != self.position:
@@ -378,7 +380,7 @@ class BoardDisplay(Frame):
 
     def build_pawns(self):
         a = []
-        for pawn in self.pawns:
+        for pawn in self.pawns.values():
             a.append(PawnToken(self.display_tiles[1], pawn.colour))
 
         return a
@@ -425,12 +427,22 @@ class Controls(Frame):
 
         if tokens[0] == "roll":
             self.display_dice(int(tokens[1]),int(tokens[2]))
-        elif tokens[0].isdigit():
-            if tokens[1] == "move":
-                # move pawn by int
-                self.board.pawns[0].move(int(tokens[2]))
-                for d_tile in self.board.display_tiles:
-                    d_tile.show_pawn()
+        #elif tokens[0].isdigit():
+        #    if tokens[1] == "move":
+        #        # move pawn by int
+        #        self.board.pawns[0].move(int(tokens[2]))
+        #        for d_tile in self.board.display_tiles:
+        #            d_tile.show_pawn()
+        elif tokens[0] == "pawn":
+            pawn_id = int(tokens[1])
+            if tokens[2] == "init":
+                self.board.pawns[pawn_id] = Pawn(pawn_id, int(tokens[3]), tokens[4])                
+                self.board.display_pawns = self.board.build_pawns()
+            elif tokens[2] == "move":
+                self.board.pawns[pawn_id].move(int(tokens[3]))
+            
+            for d_tile in self.board.display_tiles:
+                d_tile.show_pawn()
 
     #sends a request for a roll to server
     def request_roll(self):
@@ -635,11 +647,11 @@ def main(parent=None):
     img_path = "centre_img.png"
 
     #initialise board values
-    p_colours = ["magenta", "cyan", "black", "green"]
-    pawns = []
+    #p_colours = ["magenta", "cyan", "black", "green"]
+    pawns = {}
 
-    for i in range(0, 4):
-        pawns.append(Pawn(i, 0, p_colours[i]))
+    #for i in range(0, 4):
+    #    pawns.append(Pawn(i, 0, p_colours[i]))
 
     tiles = []
     tiles.append(Tile(0, 'go', 'Go'))
@@ -690,6 +702,7 @@ def main(parent=None):
     parent.ui_controls = controls_frame
     information_frame = Information(interface_divider)
 
+    parent.ui_ready = True
     root.mainloop()
 
 if __name__ == '__main__':
