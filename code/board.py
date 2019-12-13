@@ -51,6 +51,15 @@ class Board():
 			a.append(s)
 		return '\n'.join(a)
 
+class PropertyDeed():
+	def __init__(self, deed_index, category, name=None, colour=None, rent=None, mortgage=None):
+		self.deed_index = deed_index
+		self.category = category
+		self.name = name
+		self.colour = colour
+		self.rent = rent
+		self.mortgage = mortgage
+		self.unmortgage = str(round(int(mortgage) * 1.10))
 
 class Dice():
 	def __init__(self):

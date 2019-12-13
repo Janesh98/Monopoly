@@ -1,6 +1,6 @@
 from tkinter import *
 from PIL import Image, ImageTk
-from board import Tile, Pawn, Board, Dice
+from board import *
 from time import sleep
 
 '''
@@ -457,32 +457,100 @@ class Controls(Frame):
 
 
 class PropertyInfo(Frame):
-	def __init__(self, parent=None, board_dimension = 600):
-		Frame.__init__(self, parent, width = board_dimension * (2/25), height = board_dimension * (13/100), highlightthickness = 2, highlightbackground = "black", bd = 1) # correct ratios for side tile size            
+	def __init__(self, parent, deed_index, category, name=None, colour=None, rent=None, mortgage=None, unmortgage=None):
+		Frame.__init__(self, parent, width = 850 * (2/25), height = 850 * (13/100), highlightthickness = 1, highlightbackground = "black", bg="white") # correct ratios for side tile size            
 		self.parent = parent
-		self.board_dimension = board_dimension
-		self.property_title = "<>" #should point to property object from game.py
-		#self.init_card() #problem with header box taking up entire card space...
+		self.deed_index = deed_index
+		self.width = 850 * (2/25)
+		self.height = 850 * (13/100)
+		self.category = category
+		self.name = name
+		self.colour = colour
+		self.rent = rent
+		self.mortgage = mortgage
+		self.unmortgage = unmortgage
+		self.init_tile()
 
-	def init_card(self):
-		self.header = Label(self, text = self.property_title, bg = "grey", width = self.board_dimension * (2/25))
-		self.header.pack(side = TOP)
+	def init_tile(self):
+		if self.category == "property":
+			self.banner = Canvas(self, bg = self.colour, bd = 0)
+			self.banner.place(relx=0, rely=0, relwidth=1, relheight=.25)
+
+			self.tile_name = Label(self, text = self.name, font = ('Helvetica', 7), justify = CENTER, wraplength = self.width-4, padx=2, bg=self.colour)
+			self.tile_name.place(relx=.15, rely=.075)
+
+			self.rent_lbl = Label(self, text ="Rent: " + self.rent, font = ('Helvetica', 7), justify = CENTER, wraplength = self.width-4, padx=2, bg="white")
+			self.rent_lbl.place(relx=0, rely=.25)
+
+			self.mortgage_lbl = Label(self, text ="Mortgage: " + self.mortgage, font = ('Helvetica', 7), justify = CENTER, wraplength = self.width-4, padx=2, bg="white")
+			self.mortgage_lbl.place(relx=0, rely=.55)
+
+			self.unmortgage_lbl = Label(self, text ="Unmortgage: " + self.unmortgage, font = ('Helvetica', 7), justify = CENTER, wraplength = self.width-4, padx=2, bg="white")
+			self.unmortgage_lbl.place(relx=0, rely=.75)
+
+		elif self.category == "transport":
+			self.banner = Canvas(self, bg = 'white', bd = 0)
+			self.banner.place(relx=0, rely=0, relwidth=1, relheight=.25)
+
+			self.tile_name = Label(self, text = self.name, font = ('Helvetica', 7), justify = CENTER, wraplength = self.width-4, padx=2, bg="white")
+			self.tile_name.place(relx=0, rely=.25)
+
+			self.rent_lbl = Label(self, text ="Rent: " + self.rent, font = ('Helvetica', 7), justify = CENTER, wraplength = self.width-4, padx=2, bg="white")
+			self.rent_lbl.place(relx=0, rely=.55)
+
+		elif self.category == "utility":
+			self.banner = Canvas(self, bg = 'white', bd = 0)
+			self.banner.place(relx=0, rely=0, relwidth=1, relheight=.25)
+
+			self.tile_name = Label(self, text = self.name, font = ('Helvetica', 7), justify = CENTER, wraplength = self.width-4, padx=2, bg="white")
+			self.tile_name.place(relx=0, rely=.25)
+
+			self.rent_lbl = Label(self, text = self.rent, font = ('Helvetica', 7), justify = CENTER, wraplength = self.width-4, padx=2, bg="white")
+			self.rent_lbl.place(relx=0, rely=.5)
+
 
 #will contain 9*5 grid
 class Information(Frame):
-	def __init__(self, parent=None, dice=None):
+
+	def __init__(self, parent=None, property_deeds=None, dice=None):
 		Frame.__init__(self, parent, highlightthickness = 2, highlightbackground = "black", bd = 2)               
 		self.parent = parent
+		self.property_deeds = property_deeds
 		self.dice = parent.dice
 		self.funds_str = StringVar()
 		self.d1 = parent.d1
 		self.d2 = parent.d2
+		self.display_deeds = self.build_property_deeds()
 		self.init_window()
 		self.info()
-		self.cards()
 
 	def init_window(self):
 		self.pack(side = TOP, fill = BOTH)
+
+	def build_property_deeds(self):
+		a = []
+		for deed in self.property_deeds:
+			if  6 > deed.deed_index:
+				t = PropertyInfo(self, deed.deed_index, deed.category, deed.name, deed.colour, deed.rent, deed.mortgage, deed.unmortgage)
+				t.grid(row=2, column=(1+deed.deed_index), padx=1, pady=4)
+				a.append(t)
+			elif 8 > deed.deed_index > 5:
+				t = PropertyInfo(self, deed.deed_index, deed.category, deed.name, deed.colour, deed.rent, deed.mortgage, deed.unmortgage)
+				t.grid(row=2, column=(2+deed.deed_index), padx=1, pady=4)
+				a.append(t)
+			elif 17 > deed.deed_index > 7:
+				t = PropertyInfo(self, deed.deed_index, deed.category, deed.name, deed.colour, deed.rent, deed.mortgage, deed.unmortgage)
+				t.grid(row=3, column=(deed.deed_index-7), padx=1, pady=4)
+				a.append(t)
+			elif 26 > deed.deed_index > 16:
+				t = PropertyInfo(self, deed.deed_index, deed.category, deed.name, deed.colour, deed.rent, deed.mortgage, deed.unmortgage)
+				t.grid(row=4, column=(deed.deed_index-16), padx=1, pady=4)
+				a.append(t)
+			else:
+				t = PropertyInfo(self, deed.deed_index, deed.category, deed.name, deed.colour, deed.rent, deed.mortgage, deed.unmortgage)
+				t.grid(row=5, column=(deed.deed_index-25), padx=1, pady=4)
+				a.append(t)
+
 
 	def info(self):
 		self.funds_str.set("Funds: <0000>")#will link to player funds i.e. .format(player.funds)
@@ -491,96 +559,11 @@ class Information(Frame):
 
 		self.parent.d1.set("Die 1: 0")
 		self.d1_lbl = Label(self, textvariable = self.parent.d1)
-		self.d1_lbl.grid(row=1 ,column=14, padx=4, sticky = N)
+		self.d1_lbl.grid(row=1 ,column=6, padx=4, sticky = N)
 
 		self.parent.d2.set("Die 2: 0")
 		self.d1_lbl = Label(self, textvariable = self.parent.d2)
-		self.d1_lbl.grid(row =1, column=15, padx=4, sticky = N)
-
-	def cards(self):
-		self.utility_00 = PropertyInfo(self)
-		self.utility_00.grid(row=2, column=1, padx=1, pady=4)
-
-		self.utility_01 = PropertyInfo(self)
-		self.utility_01.grid(row=2, column=2, padx=1, pady=4)
-
-		self.transport_00 = PropertyInfo(self)
-		self.transport_00.grid(row=2, column=3, padx=1, pady=4)
-
-		self.transport_01 = PropertyInfo(self)
-		self.transport_01.grid(row=2, column=4, padx=1, pady=4)
-
-		self.transport_02 = PropertyInfo(self)
-		self.transport_02.grid(row=2, column=5, padx=1, pady=4)
-
-		self.transport_03 = PropertyInfo(self)
-		self.transport_03.grid(row=2, column=6, padx=1, pady=4)
-
-		self.property_01 = PropertyInfo(self)
-		self.property_01.grid(row=2, column=8, padx=1, pady=4)
-
-		self.property_02 = PropertyInfo(self)
-		self.property_02.grid(row=2, column=9, padx=1, pady=4)
-
-		self.property_03 = PropertyInfo(self)
-		self.property_03.grid(row=3, column=1, padx=1, pady=4)
-
-		self.property_04 = PropertyInfo(self)
-		self.property_04.grid(row=3, column=2, padx=1, pady=4)
-
-		self.property_05 = PropertyInfo(self)
-		self.property_05.grid(row=3, column=3, padx=1, pady=4)
-
-		self.property_06 = PropertyInfo(self)
-		self.property_06.grid(row=3, column=4, padx=1, pady=4)
-
-		self.property_07 = PropertyInfo(self)
-		self.property_07.grid(row=3, column=5, padx=1, pady=4)
-
-		self.property_08 = PropertyInfo(self)
-		self.property_08.grid(row=3, column=6, padx=1, pady=4)
-
-		self.property_09 = PropertyInfo(self)
-		self.property_09.grid(row=3, column=7, padx=1, pady=4)
-
-		self.property_10 = PropertyInfo(self)
-		self.property_10.grid(row=3, column=8, padx=1, pady=4)
-
-		self.property_11 = PropertyInfo(self)
-		self.property_11.grid(row=3, column=9, padx=1, pady=4)
-
-		self.property_12 = PropertyInfo(self)
-		self.property_12.grid(row=4, column=1, padx=1, pady=4)
-
-		self.property_13 = PropertyInfo(self)
-		self.property_13.grid(row=4, column=2, padx=1, pady=4)
-
-		self.property_14 = PropertyInfo(self)
-		self.property_14.grid(row=4, column=3, padx=1, pady=4)
-
-		self.property_15 = PropertyInfo(self)
-		self.property_15.grid(row=4, column=4, padx=1, pady=4)
-
-		self.property_16 = PropertyInfo(self)
-		self.property_16.grid(row=4, column=5, padx=1, pady=4)
-
-		self.property_17 = PropertyInfo(self)
-		self.property_17.grid(row=4, column=6, padx=1, pady=4)
-
-		self.property_18 = PropertyInfo(self)
-		self.property_18.grid(row=4, column=7, padx=1, pady=4)
-
-		self.property_19 = PropertyInfo(self)
-		self.property_19.grid(row=4, column=8, padx=1, pady=4)
-
-		self.property_20 = PropertyInfo(self)
-		self.property_20.grid(row=4, column=9, padx=1, pady=4)
-
-		self.property_21 = PropertyInfo(self)
-		self.property_21.grid(row=5, column=1, padx=1, pady=4)
-
-		self.property_22 = PropertyInfo(self)
-		self.property_22.grid(row=5, column=2, padx=1, pady=4)
+		self.d1_lbl.grid(row =1, column=7, padx=4, sticky = N)
 
 
 #general divider for UI layout
@@ -656,10 +639,40 @@ def main():
 	tiles.append(Tile(38, 'tax', 'Super Tax', None, '100'))
 	tiles.append(Tile(39, 'property', 'College Park', 'blue', '400'))
 
+	property_deeds = []
+	property_deeds.append(PropertyDeed(0, 'utility', 'DCU Sport', None, '4x Dice Roll', '75'))
+	property_deeds.append(PropertyDeed(1, 'utility', 'DCU Library', None, '4x Dice Roll', '75'))
+	property_deeds.append(PropertyDeed(2, 'transport', 'Helix Bus Stop', None, '25', '100'))
+	property_deeds.append(PropertyDeed(3, 'transport', 'St Pats Bus Stop', None, '25', '100'))
+	property_deeds.append(PropertyDeed(4, 'transport', 'Ballymun Bus Stop', None, '25', '100'))
+	property_deeds.append(PropertyDeed(5, 'transport', 'Collins Ave. Bus Stop', None, '25', '100'))
+	property_deeds.append(PropertyDeed(6, 'property', 'Nubar', 'Brown', '2', '30'))
+	property_deeds.append(PropertyDeed(7, 'property', 'Larkfield','Brown', '4', '30'))
+	property_deeds.append(PropertyDeed(8, 'property', 'B. School','Cyan', '6', '50'))
+	property_deeds.append(PropertyDeed(9, 'property', 'H. Grattan','Cyan', '6', '50'))
+	property_deeds.append(PropertyDeed(10, 'property', 'T.L. Theatre','Cyan', '8', '60'))
+	property_deeds.append(PropertyDeed(11, 'property', 'DCU Canteen','Magenta', '10', '70'))
+	property_deeds.append(PropertyDeed(12, 'property', 'Interfaith','Magenta', '10', '70'))
+	property_deeds.append(PropertyDeed(13, 'property', 'Albert College','Magenta', '12', '80'))
+	property_deeds.append(PropertyDeed(14, 'property', 'Nursing Build.','Orange', '14', '90'))
+	property_deeds.append(PropertyDeed(15, 'property', 'Lonsdale','Orange', '14', '90'))
+	property_deeds.append(PropertyDeed(16, 'property', 'Estates','Orange', '16', '100'))
+	property_deeds.append(PropertyDeed(17, 'property', 'Londis','Red', '18', '120'))
+	property_deeds.append(PropertyDeed(18, 'property', 'The U','Red', '18', '120'))
+	property_deeds.append(PropertyDeed(19, 'property', 'Hampstead','Red', '20', '140'))
+	property_deeds.append(PropertyDeed(20, 'property', 'Purcell H.','Yellow', '22', '160'))
+	property_deeds.append(PropertyDeed(21, 'property', 'All Hallows','Yellow', '22', '160'))
+	property_deeds.append(PropertyDeed(22, 'property', 'St Pats','Yellow', '24', '180'))
+	property_deeds.append(PropertyDeed(23, 'property', 'Stokes Build.','Green', '26', '200'))
+	property_deeds.append(PropertyDeed(24, 'property', 'Campus Store','Green', '26', '200'))
+	property_deeds.append(PropertyDeed(25, 'property', 'The Helix','Green', '28', '220'))
+	property_deeds.append(PropertyDeed(26, 'property', 'McNulty B.','Blue', '35', '175'))
+	property_deeds.append(PropertyDeed(27, 'property', 'The Helix','Blue', '50', '175'))
+
 	board_frame = BoardDisplay(game_divider, board_dim, board_dim, img_path, tiles, pawns)
 
-	controls_frame = Controls(interface_divider, board_frame) #interface_divider = parent, board_frame = internal reference of board for using commands on
-	information_frame = Information(interface_divider)
+	controls_frame = Controls(interface_divider, board_frame) #interface_divideHampsteadr = parent, board_frame = internal reference of board for using commands on
+	information_frame = Information(interface_divider, property_deeds)
 
 	root.mainloop()
 
