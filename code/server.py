@@ -56,21 +56,23 @@ class Server:
         #send server info to client
         self.send_info(conn)
         
-        while self.server_running:
-            #try:
+        quit = False
+        while self.server_running and not quit:
             message = conn.recv(1024)           #receive client commands
             if message:
                 for command in message.decode().strip().split("\n"):
                     #self.send_all(dec_message)      #echos message
                     print(command)              #for debugging
                     #
-                    self.process_command(conn, command)
-                    #
-                    #connected_devices[conn]["player"].client_command(dec_message)   #process client commands
+                    if command == "quit":
+                        conn.close()
+                        del self.connected_devices[conn]
+                        quit = True
+                        break
+                    else:
+                        self.process_command(conn, command)
             else:
                 pass
-            #except:
-            #    pass
 
     def run(self):
         try:
@@ -80,11 +82,11 @@ class Server:
                 print("{} connected".format(addr))
                 self.start_client_thread(conn, addr)
         except KeyboardInterrupt:           #shutdown server by ^C
-            print(" Server shutting down")
-            for conn in self.connected_devices:
-                conn.close()                #closes all connections
-            self.server_socket.close()
+            print("Server shutting down")
             self.server_running = False
+            for conn in self.connected_devices.keys():
+                self.send_client(conn, "kick")
+                conn.close()
 
 if __name__ == "__main__":
     s = Server(port=sys.argv[1])

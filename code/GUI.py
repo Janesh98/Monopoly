@@ -467,7 +467,8 @@ class Controls(Frame):
             print(d_tile)
 
     def abandon(self):
-        self.client.send_server("quit")
+        if self.client.connected:
+            self.client.send_server("quit")
         self.root.destroy()
 
     def buttons(self):
@@ -700,6 +701,7 @@ def main(parent=None):
     #interface_divider = parent, board_frame = internal reference of board for using commands on
     controls_frame = Controls(interface_divider, board_frame, parent)
     parent.ui_controls = controls_frame
+    parent.ui_root = root
     information_frame = Information(interface_divider)
 
     parent.ui_ready = True
